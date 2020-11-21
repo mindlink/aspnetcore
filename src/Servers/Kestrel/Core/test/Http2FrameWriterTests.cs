@@ -55,7 +55,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
 
         private Http2FrameWriter CreateFrameWriter(Pipe pipe)
         {
-            var serviceContext = TestContextFactory.CreateServiceContext(new KestrelServerOptions());
+            var serviceContext = TestContextFactory.CreateServiceContext(new KestrelServerOptions(), log: Mock.Of<IKestrelTrace>());
             return new Http2FrameWriter(pipe.Writer, null, null, null, null, null, null, _dirtyMemoryPool, serviceContext);
         }
 

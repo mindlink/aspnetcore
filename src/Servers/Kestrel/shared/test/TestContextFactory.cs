@@ -30,15 +30,17 @@ namespace Microsoft.AspNetCore.Testing
             ConnectionManager connectionManager = null,
             Heartbeat heartbeat = null)
         {
-            var context = new ServiceContext(
-                log,
-                scheduler,
-                httpParser,
-                systemClock,
-                dateHeaderValueManager,
-                connectionManager,
-                heartbeat,
-                serverOptions);
+            var context = new ServiceContext
+            {
+                Log = log,
+                Scheduler = scheduler,
+                HttpParser = httpParser,
+                SystemClock = systemClock,
+                DateHeaderValueManager = dateHeaderValueManager,
+                ConnectionManager = connectionManager,
+                Heartbeat = heartbeat,
+                ServerOptions = serverOptions
+            };
 
             return context;
         }

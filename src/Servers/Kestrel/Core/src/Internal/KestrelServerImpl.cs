@@ -117,15 +117,17 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core
                 DebuggerWrapper.Singleton,
                 trace);
 
-            return new ServiceContext(
-                trace,
-                PipeScheduler.ThreadPool,
-                new HttpParser<Http1ParsingHandler>(trace.IsEnabled(LogLevel.Information)),
-                heartbeatManager,
-                dateHeaderValueManager,
-                connectionManager,
-                heartbeat,
-                serverOptions);
+            return new ServiceContext
+            {
+                Log = trace,
+                Scheduler = PipeScheduler.ThreadPool,
+                HttpParser = new HttpParser<Http1ParsingHandler>(trace.IsEnabled(LogLevel.Information)),
+                SystemClock = heartbeatManager,
+                DateHeaderValueManager = dateHeaderValueManager,
+                ConnectionManager = connectionManager,
+                Heartbeat = heartbeat,
+                ServerOptions = serverOptions
+            };
         }
 
         public IFeatureCollection Features { get; }

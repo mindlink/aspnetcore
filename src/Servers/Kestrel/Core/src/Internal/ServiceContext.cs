@@ -7,42 +7,25 @@ using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure;
 
 namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
 {
+    // Ideally this type should be readonly and initialized with a constructor.
+    // Tests use TestServiceContext which inherits from this type and sets properties.
+    // Changing this type would be a lot of work.
     internal class ServiceContext
     {
-        public ServiceContext(
-            IKestrelTrace log,
-            PipeScheduler scheduler,
-            IHttpParser<Http1ParsingHandler> httpParser,
-            ISystemClock systemClock,
-            DateHeaderValueManager dateHeaderValueManager,
-            ConnectionManager connectionManager,
-            Heartbeat heartbeat,
-            KestrelServerOptions serverOptions)
-        {
-            Log = log;
-            Scheduler = scheduler;
-            HttpParser = httpParser;
-            SystemClock = systemClock;
-            DateHeaderValueManager = dateHeaderValueManager;
-            ConnectionManager = connectionManager;
-            Heartbeat = heartbeat;
-            ServerOptions = serverOptions;
-        }
+        public IKestrelTrace Log { get; set; } = default!;
 
-        public IKestrelTrace Log { get; }
+        public PipeScheduler Scheduler { get; set; } = default!;
 
-        public PipeScheduler Scheduler { get; }
+        public IHttpParser<Http1ParsingHandler> HttpParser { get; set; } = default!;
 
-        public IHttpParser<Http1ParsingHandler> HttpParser { get; }
+        public ISystemClock SystemClock { get; set; } = default!;
 
-        public ISystemClock SystemClock { get; }
+        public DateHeaderValueManager DateHeaderValueManager { get; set; } = default!;
 
-        public DateHeaderValueManager DateHeaderValueManager { get; }
+        public ConnectionManager ConnectionManager { get; set; } = default!;
 
-        public ConnectionManager ConnectionManager { get; }
+        public Heartbeat Heartbeat { get; set; } = default!;
 
-        public Heartbeat Heartbeat { get; }
-
-        public KestrelServerOptions ServerOptions { get; }
+        public KestrelServerOptions ServerOptions { get; set; } = default!;
     }
 }
