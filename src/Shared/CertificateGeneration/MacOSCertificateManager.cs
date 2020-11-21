@@ -86,7 +86,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
 
         internal override CheckCertificateStateResult CheckCertificateState(X509Certificate2 candidate, bool interactive)
         {
-            var sentinelPath = Path.Combine(Environment.GetEnvironmentVariable("HOME"), ".dotnet", $"certificates.{candidate.GetCertHashString(HashAlgorithmName.SHA256)}.sentinel");
+            var sentinelPath = Path.Combine(Environment.GetEnvironmentVariable("HOME")!, ".dotnet", $"certificates.{candidate.GetCertHashString(HashAlgorithmName.SHA256)}.sentinel");
             if (!interactive && !File.Exists(sentinelPath))
             {
                 return new CheckCertificateStateResult(false, KeyNotAccessibleWithoutUserInteraction);
@@ -149,7 +149,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
             {
                 RedirectStandardOutput = true
             });
-            var output = checkTrustProcess.StandardOutput.ReadToEnd();
+            var output = checkTrustProcess!.StandardOutput.ReadToEnd();
             checkTrustProcess.WaitForExit();
             var matches = Regex.Matches(output, MacOSFindCertificateOutputRegex, RegexOptions.Multiline, MaxRegexTimeout);
             var hashes = matches.OfType<Match>().Select(m => m.Groups[1].Value).ToList();
@@ -200,7 +200,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
                         certificatePath
                     ));
                 using var process = Process.Start(processInfo);
-                process.WaitForExit();
+                process!.WaitForExit();
                 if (process.ExitCode != 0)
                 {
                     Log.MacOSRemoveCertificateTrustRuleError(process.ExitCode);
@@ -241,7 +241,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
             Log.MacOSRemoveCertificateFromKeyChainStart(keyChain, GetDescription(certificate));
             using (var process = Process.Start(processInfo))
             {
-                var output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
+                var output = process!.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
                 process.WaitForExit();
 
                 if (process.ExitCode != 0)
@@ -285,7 +285,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
             Log.MacOSAddCertificateToKeyChainStart(MacOSUserKeyChain, GetDescription(certificate));
             using (var process = Process.Start(processInfo))
             {
-                var output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
+                var output = process!.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
                 process.WaitForExit();
 
                 if (process.ExitCode != 0)

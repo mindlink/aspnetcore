@@ -25,15 +25,10 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
 
         public HttpProtocolFeatureCollectionTests()
         {
-            var context = new Http2StreamContext
-            {
-                ServiceContext = new TestServiceContext(),
-                ConnectionFeatures = new FeatureCollection(),
-                TimeoutControl = Mock.Of<ITimeoutControl>(),
-                Transport = Mock.Of<IDuplexPipe>(),
-                ServerPeerSettings = new Http2PeerSettings(),
-                ClientPeerSettings = new Http2PeerSettings(),
-            };
+            var context = TestContextFactory.CreateHttp2StreamContext(
+                serviceContext: new TestServiceContext(),
+                transport: Mock.Of<IDuplexPipe>(),
+                timeoutControl: Mock.Of<ITimeoutControl>());
 
             _httpConnectionContext = context;
             _http1Connection = new TestHttp1Connection(context);

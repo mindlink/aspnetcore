@@ -9,20 +9,40 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
 {
     internal class ServiceContext
     {
-        public IKestrelTrace Log { get; set; }
+        public ServiceContext(
+            IKestrelTrace log,
+            PipeScheduler scheduler,
+            IHttpParser<Http1ParsingHandler> httpParser,
+            ISystemClock systemClock,
+            DateHeaderValueManager dateHeaderValueManager,
+            ConnectionManager connectionManager,
+            Heartbeat heartbeat,
+            KestrelServerOptions serverOptions)
+        {
+            Log = log;
+            Scheduler = scheduler;
+            HttpParser = httpParser;
+            SystemClock = systemClock;
+            DateHeaderValueManager = dateHeaderValueManager;
+            ConnectionManager = connectionManager;
+            Heartbeat = heartbeat;
+            ServerOptions = serverOptions;
+        }
 
-        public PipeScheduler Scheduler { get; set; }
+        public IKestrelTrace Log { get; }
 
-        public IHttpParser<Http1ParsingHandler> HttpParser { get; set; }
+        public PipeScheduler Scheduler { get; }
 
-        public ISystemClock SystemClock { get; set; }
+        public IHttpParser<Http1ParsingHandler> HttpParser { get; }
 
-        public DateHeaderValueManager DateHeaderValueManager { get; set; }
+        public ISystemClock SystemClock { get; }
 
-        public ConnectionManager ConnectionManager { get; set; }
+        public DateHeaderValueManager DateHeaderValueManager { get; }
 
-        public Heartbeat Heartbeat { get; set; }
+        public ConnectionManager ConnectionManager { get; }
 
-        public KestrelServerOptions ServerOptions { get; set; }
+        public Heartbeat Heartbeat { get; }
+
+        public KestrelServerOptions ServerOptions { get; }
     }
 }

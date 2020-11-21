@@ -24,9 +24,9 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
 
         private readonly IConfiguration _configuration;
 
-        private IDictionary<string, CertificateConfig> _certificates;
-        private EndpointDefaults _endpointDefaults;
-        private IEnumerable<EndpointConfig> _endpoints;
+        private IDictionary<string, CertificateConfig>? _certificates;
+        private EndpointDefaults? _endpointDefaults;
+        private IEnumerable<EndpointConfig>? _endpoints;
 
         public ConfigurationReader(IConfiguration configuration)
         {
@@ -101,17 +101,15 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
                     throw new InvalidOperationException(CoreStrings.FormatEndpointMissingUrl(endpointConfig.Key));
                 }
 
-                var endpoint = new EndpointConfig
-                {
-                    Name = endpointConfig.Key,
-                    Url = url,
-                    Protocols = ParseProtocols(endpointConfig[ProtocolsKey]),
-                    ConfigSection = endpointConfig,
-                    Certificate = new CertificateConfig(endpointConfig.GetSection(CertificateKey)),
-                    SslProtocols = ParseSslProcotols(endpointConfig.GetSection(SslProtocolsKey)),
-                    ClientCertificateMode = ParseClientCertificateMode(endpointConfig[ClientCertificateModeKey]),
-                    Sni = ReadSni(endpointConfig.GetSection(SniKey), endpointConfig.Key),
-                };
+                var endpoint = new EndpointConfig(
+                    endpointConfig.Key,
+                    url,
+                    ParseProtocols(endpointConfig[ProtocolsKey]),
+                    ParseSslProcotols(endpointConfig.GetSection(SslProtocolsKey)),
+                    new CertificateConfig(endpointConfig.GetSection(CertificateKey)),
+                    ParseClientCertificateMode(endpointConfig[ClientCertificateModeKey]),
+                    ReadSni(endpointConfig.GetSection(SniKey), endpointConfig.Key),
+                    endpointConfig);
 
                 endpoints.Add(endpoint);
             }
@@ -202,7 +200,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
 
         internal static void ThrowIfContainsHttpsOnlyConfiguration(EndpointConfig endpoint)
         {
-            if (endpoint.Certificate.IsFileCert || endpoint.Certificate.IsStoreCert)
+            if (endpoint.Certificate != null && (endpoint.Certificate.IsFileCert || endpoint.Certificate.IsStoreCert))
             {
                 throw new InvalidOperationException(CoreStrings.FormatEndpointHasUnusedHttpsConfig(endpoint.Name, CertificateKey));
             }
@@ -259,33 +257,45 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
     // }
     internal class EndpointConfig
     {
-        private IConfigurationSection _configSection;
         private ConfigSectionClone _configSectionClone;
 
-        public string Name { get; set; }
-        public string Url { get; set; }
-        public HttpProtocols? Protocols { get; set; }
-        public SslProtocols? SslProtocols { get; set; }
-        public CertificateConfig Certificate { get; set; }
-        public ClientCertificateMode? ClientCertificateMode { get; set; }
-        public Dictionary<string, SniConfig> Sni { get; set; }
-
-        // Compare config sections because it's accessible to app developers via an Action<EndpointConfiguration> callback.
-        // We cannot rely entirely on comparing config sections for equality, because KestrelConfigurationLoader.Reload() sets
-        // EndpointConfig properties to their default values. If a default value changes, the properties would no longer be equal,
-        // but the config sections could still be equal.
-        public IConfigurationSection ConfigSection
+        public EndpointConfig(
+            string name,
+            string url,
+            HttpProtocols? protocols,
+            SslProtocols? sslProtocols,
+            CertificateConfig certificate,
+            ClientCertificateMode? clientCertificateMode,
+            Dictionary<string, SniConfig> sni,
+            IConfigurationSection configSection)
         {
-            get => _configSection;
-            set
-            {
-                _configSection = value;
-                // The IConfigrationSection will mutate, so we need to take a snapshot to compare against later and check for changes.
-                _configSectionClone = new ConfigSectionClone(value);
-            }
+            Name = name;
+            Url = url;
+            Protocols = protocols;
+            SslProtocols = sslProtocols;
+            Certificate = certificate;
+            ClientCertificateMode = clientCertificateMode;
+            Sni = sni;
+
+            // Compare config sections because it's accessible to app developers via an Action<EndpointConfiguration> callback.
+            // We cannot rely entirely on comparing config sections for equality, because KestrelConfigurationLoader.Reload() sets
+            // EndpointConfig properties to their default values. If a default value changes, the properties would no longer be equal,
+            // but the config sections could still be equal.
+            ConfigSection = configSection;
+            // The IConfigrationSection will mutate, so we need to take a snapshot to compare against later and check for changes.
+            _configSectionClone = new ConfigSectionClone(configSection);
         }
 
-        public override bool Equals(object obj) =>
+        public string Name { get; }
+        public string Url { get; }
+        public HttpProtocols? Protocols { get; set; }
+        public SslProtocols? SslProtocols { get; set; }
+        public CertificateConfig? Certificate { get; set; }
+        public ClientCertificateMode? ClientCertificateMode { get; set; }
+        public Dictionary<string, SniConfig> Sni { get; }
+        public IConfigurationSection ConfigSection { get; }
+
+        public override bool Equals(object? obj) =>
             obj is EndpointConfig other &&
             Name == other.Name &&
             Url == other.Url &&
@@ -300,8 +310,8 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
             Protocols ?? ListenOptions.DefaultHttpProtocols, SslProtocols ?? System.Security.Authentication.SslProtocols.None,
             Certificate, ClientCertificateMode ?? Https.ClientCertificateMode.NoCertificate, Sni.Count, _configSectionClone);
 
-        public static bool operator ==(EndpointConfig lhs, EndpointConfig rhs) => lhs is null ? rhs is null : lhs.Equals(rhs);
-        public static bool operator !=(EndpointConfig lhs, EndpointConfig rhs) => !(lhs == rhs);
+        public static bool operator ==(EndpointConfig? lhs, EndpointConfig? rhs) => lhs is null ? rhs is null : lhs.Equals(rhs);
+        public static bool operator !=(EndpointConfig? lhs, EndpointConfig? rhs) => !(lhs == rhs);
 
         private static bool CompareSniDictionaries(Dictionary<string, SniConfig> lhs, Dictionary<string, SniConfig> rhs)
         {
@@ -326,10 +336,10 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
     {
         public HttpProtocols? Protocols { get; set; }
         public SslProtocols? SslProtocols { get; set; }
-        public CertificateConfig Certificate { get; set; }
+        public CertificateConfig? Certificate { get; set; }
         public ClientCertificateMode? ClientCertificateMode { get; set; }
 
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj is SniConfig other &&
             (Protocols ?? ListenOptions.DefaultHttpProtocols) == (other.Protocols ?? ListenOptions.DefaultHttpProtocols) &&
             (SslProtocols ?? System.Security.Authentication.SslProtocols.None) == (other.SslProtocols ?? System.Security.Authentication.SslProtocols.None) &&
@@ -373,30 +383,30 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
         {
         }
 
-        public IConfigurationSection ConfigSection { get; }
+        public IConfigurationSection? ConfigSection { get; }
 
         // File
         public bool IsFileCert => !string.IsNullOrEmpty(Path);
 
-        public string Path { get; set; }
+        public string? Path { get; set; }
 
-        public string KeyPath { get; set; }
+        public string? KeyPath { get; set; }
 
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         // Cert store
 
         public bool IsStoreCert => !string.IsNullOrEmpty(Subject);
 
-        public string Subject { get; set; }
+        public string? Subject { get; set; }
 
-        public string Store { get; set; }
+        public string? Store { get; set; }
 
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         public bool? AllowInvalid { get; set; }
 
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj is CertificateConfig other &&
             Path == other.Path &&
             KeyPath == other.KeyPath &&
@@ -408,7 +418,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
 
         public override int GetHashCode() => HashCode.Combine(Path, KeyPath, Password, Subject, Store, Location, AllowInvalid ?? false);
 
-        public static bool operator ==(CertificateConfig lhs, CertificateConfig rhs) => lhs is null ? rhs is null : lhs.Equals(rhs);
-        public static bool operator !=(CertificateConfig lhs, CertificateConfig rhs) => !(lhs == rhs);
+        public static bool operator ==(CertificateConfig? lhs, CertificateConfig? rhs) => lhs is null ? rhs is null : lhs.Equals(rhs);
+        public static bool operator !=(CertificateConfig? lhs, CertificateConfig? rhs) => !(lhs == rhs);
     }
 }

@@ -279,7 +279,7 @@ override Microsoft.AspNetCore.Http.DefaultHttpContext.TraceIdentifier.set -> voi
 override Microsoft.AspNetCore.Http.DefaultHttpContext.User.get -> System.Security.Claims.ClaimsPrincipal!
 override Microsoft.AspNetCore.Http.DefaultHttpContext.User.set -> void
 override Microsoft.AspNetCore.Http.DefaultHttpContext.WebSockets.get -> Microsoft.AspNetCore.Http.WebSocketManager!
-static Microsoft.AspNetCore.Http.BindingAddress.Parse(string! address) -> Microsoft.AspNetCore.Http.BindingAddress!
+static Microsoft.AspNetCore.Http.BindingAddress.Parse(string? address) -> Microsoft.AspNetCore.Http.BindingAddress!
 static Microsoft.AspNetCore.Http.HttpRequestRewindExtensions.EnableBuffering(this Microsoft.AspNetCore.Http.HttpRequest! request) -> void
 static Microsoft.AspNetCore.Http.HttpRequestRewindExtensions.EnableBuffering(this Microsoft.AspNetCore.Http.HttpRequest! request, int bufferThreshold) -> void
 static Microsoft.AspNetCore.Http.HttpRequestRewindExtensions.EnableBuffering(this Microsoft.AspNetCore.Http.HttpRequest! request, int bufferThreshold, long bufferLimit) -> void

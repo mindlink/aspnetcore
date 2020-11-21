@@ -17,9 +17,9 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http2
                                          IHttpResponseTrailersFeature
 
     {
-        private IHeaderDictionary _userTrailers;
+        private IHeaderDictionary? _userTrailers;
 
-        IHeaderDictionary IHttpResponseTrailersFeature.Trailers
+        IHeaderDictionary? IHttpResponseTrailersFeature.Trailers
         {
             get
             {
@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http2
 
         int IHttp2StreamIdFeature.StreamId => _context.StreamId;
 
-        MinDataRate IHttpMinRequestBodyDataRateFeature.MinDataRate
+        MinDataRate? IHttpMinRequestBodyDataRateFeature.MinDataRate
         {
             get => throw new NotSupportedException(CoreStrings.Http2MinDataRateNotSupported);
             set 

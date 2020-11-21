@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
 {
@@ -73,7 +74,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
         /// Returns an <see cref="IPEndPoint"/> for the given host an port.
         /// If the host parameter isn't "localhost" or an IP address, use IPAddress.Any.
         /// </summary>
-        protected internal static bool TryCreateIPEndPoint(BindingAddress address, out IPEndPoint endpoint)
+        protected internal static bool TryCreateIPEndPoint(BindingAddress address, [NotNullWhen(true)] out IPEndPoint? endpoint)
         {
             if (!IPAddress.TryParse(address.Host, out var ip))
             {
@@ -99,7 +100,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
             context.ServerOptions.OptionsInUse.Add(endpoint);
         }
 
-        internal static ListenOptions ParseAddress(string address, out bool https)
+        internal static ListenOptions ParseAddress(string? address, out bool https)
         {
             var parsedAddress = BindingAddress.Parse(address);
             https = false;
@@ -118,7 +119,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
                 throw new InvalidOperationException(CoreStrings.FormatConfigurePathBaseFromMethodCall($"{nameof(IApplicationBuilder)}.UsePathBase()"));
             }
 
-            ListenOptions options = null;
+            ListenOptions? options = null;
             if (parsedAddress.IsUnixPipe)
             {
                 options = new ListenOptions(parsedAddress.UnixPipePath);
@@ -150,12 +151,12 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
         {
             public async Task BindAsync(AddressBindContext context)
             {
-                var httpDefault = ParseAddress(Constants.DefaultServerAddress, out var https);
+                var httpDefault = ParseAddress(Constants.DefaultServerAddress, out _);
                 context.ServerOptions.ApplyEndpointDefaults(httpDefault);
                 await httpDefault.BindAsync(context).ConfigureAwait(false);
 
                 // Conditional https default, only if a cert is available
-                var httpsDefault = ParseAddress(Constants.DefaultServerHttpsAddress, out https);
+                var httpsDefault = ParseAddress(Constants.DefaultServerHttpsAddress, out _);
                 context.ServerOptions.ApplyEndpointDefaults(httpsDefault);
 
                 if (httpsDefault.IsTls || httpsDefault.TryUseHttps())

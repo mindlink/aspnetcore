@@ -75,7 +75,7 @@ namespace Microsoft.AspNetCore.Http
                 && PathBase == other.PathBase;
         }
 
-        public static BindingAddress Parse(string address)
+        public static BindingAddress Parse(string? address)
         {
             address = address ?? string.Empty;
 

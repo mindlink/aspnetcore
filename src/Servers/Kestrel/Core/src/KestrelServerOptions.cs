@@ -27,9 +27,9 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core
     public class KestrelServerOptions
     {
         // internal to fast-path header decoding when RequestHeaderEncodingSelector is unchanged.
-        internal static readonly Func<string, Encoding> DefaultRequestHeaderEncodingSelector = _ => null;
+        internal static readonly Func<string, Encoding?> DefaultRequestHeaderEncodingSelector = _ => null;
 
-        private Func<string, Encoding> _requestHeaderEncodingSelector = DefaultRequestHeaderEncodingSelector;
+        private Func<string, Encoding?> _requestHeaderEncodingSelector = DefaultRequestHeaderEncodingSelector;
 
         // The following two lists configure the endpoints that Kestrel should listen to. If both lists are empty, the "urls" config setting (e.g. UseUrls) is used.
         internal List<ListenOptions> CodeBackedListenOptions { get; } = new List<ListenOptions>();
@@ -86,7 +86,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core
         /// Gets or sets a callback that returns the <see cref="Encoding"/> to decode the value for the specified request header name,
         /// or <see langword="null"/> to use the default <see cref="UTF8Encoding"/>.
         /// </summary>
-        public Func<string, Encoding> RequestHeaderEncodingSelector
+        public Func<string, Encoding?> RequestHeaderEncodingSelector
         {
             get => _requestHeaderEncodingSelector;
             set => _requestHeaderEncodingSelector = value ?? throw new ArgumentNullException(nameof(value));
@@ -96,7 +96,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core
         /// Enables the Listen options callback to resolve and use services registered by the application during startup.
         /// Typically initialized by UseKestrel().
         /// </summary>
-        public IServiceProvider ApplicationServices { get; set; }
+        public IServiceProvider ApplicationServices { get; set; } = default!; // This should typically be set
 
         /// <summary>
         /// Provides access to request limit options.
@@ -107,7 +107,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core
         /// Provides a configuration source where endpoints will be loaded from on server start.
         /// The default is <see langword="null"/>.
         /// </summary>
-        public KestrelConfigurationLoader ConfigurationLoader { get; set; }
+        public KestrelConfigurationLoader? ConfigurationLoader { get; set; }
 
         /// <summary>
         /// A default configuration action for all endpoints. Use for Listen, configuration, the default url, and URLs.
@@ -122,7 +122,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core
         /// <summary>
         /// The default server certificate for https endpoints. This is applied lazily after HttpsDefaults and user options.
         /// </summary>
-        internal X509Certificate2 DefaultCertificate { get; set; }
+        internal X509Certificate2? DefaultCertificate { get; set; }
 
         /// <summary>
         /// Has the default dev certificate load been attempted?
@@ -192,7 +192,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core
                             // case. The underlying implementation of this check is specific to Mac OS and is handled within CheckCertificateState.
                             // Kestrel must NEVER cause a UI prompt on a production system. We only attempt this here because Mac OS is not supported
                             // in production.
-                            logger.DeveloperCertificateFirstRun(status.Message);
+                            logger.DeveloperCertificateFirstRun(status.Message!);
 
                             // Now that we've displayed a warning in the logs so that the user gets a notification that a prompt might appear, try
                             // and access the certificate key, which might trigger a prompt.

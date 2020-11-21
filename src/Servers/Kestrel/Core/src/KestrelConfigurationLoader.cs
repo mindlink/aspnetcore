@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -78,7 +79,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel
         // Actions that will be delayed until Load so that they aren't applied if the configuration loader is replaced.
         private IList<Action> EndpointsToAdd { get; } = new List<Action>();
 
-        private CertificateConfig DefaultCertificateConfig { get; set; }
+        private CertificateConfig? DefaultCertificateConfig { get; set; }
 
         /// <summary>
         /// Specifies a configuration Action to run when an endpoint with the given name is loaded from configuration.
@@ -436,9 +437,9 @@ namespace Microsoft.AspNetCore.Server.Kestrel
             }
         }
 
-        private (X509Certificate2, CertificateConfig) FindDeveloperCertificateFile()
+        private (X509Certificate2?, CertificateConfig?) FindDeveloperCertificateFile()
         {
-            string certificatePath = null;
+            string? certificatePath = null;
             try
             {
                 if (ConfigurationReader.Certificates.TryGetValue("Development", out var certificateConfig) &&
@@ -476,7 +477,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel
 
             foreach (var ext in certificate.Extensions)
             {
-                if (string.Equals(ext.Oid.Value, CertificateManager.AspNetHttpsOid, StringComparison.Ordinal))
+                if (string.Equals(ext.Oid?.Value, CertificateManager.AspNetHttpsOid, StringComparison.Ordinal))
                 {
                     return true;
                 }
@@ -485,7 +486,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel
             return false;
         }
 
-        private bool TryGetCertificatePath(out string path)
+        private bool TryGetCertificatePath([NotNullWhen(true)] out string? path)
         {
             // This will go away when we implement
             // https://github.com/aspnet/Hosting/issues/1294

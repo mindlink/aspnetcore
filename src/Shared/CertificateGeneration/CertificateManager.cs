@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
@@ -61,7 +62,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
 
         public bool IsHttpsDevelopmentCertificate(X509Certificate2 certificate) =>
             certificate.Extensions.OfType<X509Extension>()
-            .Any(e => string.Equals(AspNetHttpsOid, e.Oid.Value, StringComparison.Ordinal));
+            .Any(e => string.Equals(AspNetHttpsOid, e.Oid?.Value, StringComparison.Ordinal));
 
         public IList<X509Certificate2> ListCertificates(
             StoreName storeName,
@@ -122,12 +123,12 @@ namespace Microsoft.AspNetCore.Certificates.Generation
 
             bool HasOid(X509Certificate2 certificate, string oid) =>
                 certificate.Extensions.OfType<X509Extension>()
-                    .Any(e => string.Equals(oid, e.Oid.Value, StringComparison.Ordinal));
+                    .Any(e => string.Equals(oid, e.Oid?.Value, StringComparison.Ordinal));
 
             static byte GetCertificateVersion(X509Certificate2 c)
             {
                 var byteArray = c.Extensions.OfType<X509Extension>()
-                    .Where(e => string.Equals(AspNetHttpsOid, e.Oid.Value, StringComparison.Ordinal))
+                    .Where(e => string.Equals(AspNetHttpsOid, e.Oid?.Value, StringComparison.Ordinal))
                     .Single()
                     .RawData;
 
@@ -156,10 +157,10 @@ namespace Microsoft.AspNetCore.Certificates.Generation
         public EnsureCertificateResult EnsureAspNetCoreHttpsDevelopmentCertificate(
             DateTimeOffset notBefore,
             DateTimeOffset notAfter,
-            string path = null,
+            string? path = null,
             bool trust = false,
             bool includePrivateKey = false,
-            string password = null,
+            string? password = null,
             CertificateKeyExportFormat keyExportFormat = CertificateKeyExportFormat.Pfx,
             bool isInteractive = true)
         {
@@ -177,7 +178,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
 
             certificates = filteredCertificates;
 
-            X509Certificate2 certificate = null;
+            X509Certificate2? certificate = null;
             var isNewCertificate = false;
             if (certificates.Any())
             {
@@ -388,7 +389,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
 
         protected abstract IList<X509Certificate2> GetCertificatesToRemove(StoreName storeName, StoreLocation storeLocation);
 
-        internal void ExportCertificate(X509Certificate2 certificate, string path, bool includePrivateKey, string password, CertificateKeyExportFormat format)
+        internal void ExportCertificate(X509Certificate2 certificate, string path, bool includePrivateKey, string? password, CertificateKeyExportFormat format)
         {
             Log.ExportCertificateStart(GetDescription(certificate), path, includePrivateKey);
             if (includePrivateKey && password == null)
@@ -397,7 +398,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
             }
 
             var targetDirectoryPath = Path.GetDirectoryName(path);
-            if (targetDirectoryPath != "")
+            if (!string.IsNullOrEmpty(targetDirectoryPath))
             {
                 Log.CreateExportCertificateDirectory(targetDirectoryPath);
                 Directory.CreateDirectory(targetDirectoryPath);
@@ -405,8 +406,8 @@ namespace Microsoft.AspNetCore.Certificates.Generation
 
             byte[] bytes;
             byte[] keyBytes;
-            byte[] pemEnvelope = null;
-            RSA key = null;
+            byte[]? pemEnvelope = null;
+            RSA? key = null;
 
             try
             {
@@ -418,7 +419,7 @@ namespace Microsoft.AspNetCore.Certificates.Generation
                             bytes = certificate.Export(X509ContentType.Pkcs12, password);
                             break;
                         case CertificateKeyExportFormat.Pem:
-                            key = certificate.GetRSAPrivateKey();
+                            key = certificate.GetRSAPrivateKey()!; // TODO - what if PEM doesn't have a private key?
 
                             char[] pem;
                             if (password != null)
@@ -492,6 +493,8 @@ namespace Microsoft.AspNetCore.Certificates.Generation
 
             if (includePrivateKey && format == CertificateKeyExportFormat.Pem)
             {
+                Debug.Assert(pemEnvelope != null);
+
                 try
                 {
                     var keyPath = Path.ChangeExtension(path, ".key");
@@ -918,9 +921,9 @@ namespace Microsoft.AspNetCore.Certificates.Generation
         internal struct CheckCertificateStateResult
         {
             public bool Result { get; }
-            public string Message { get; }
+            public string? Message { get; }
 
-            public CheckCertificateStateResult(bool result, string message)
+            public CheckCertificateStateResult(bool result, string? message)
             {
                 Result = result;
                 Message = message;
