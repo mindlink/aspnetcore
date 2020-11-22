@@ -134,7 +134,9 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http
 
         public void HandleReadDataRateTimeout()
         {
-            Log.RequestBodyMinimumDataRateNotSatisfied(ConnectionId, TraceIdentifier, MinRequestBodyDataRate!.BytesPerSecond);
+            Debug.Assert(MinRequestBodyDataRate != null);
+
+            Log.RequestBodyMinimumDataRateNotSatisfied(ConnectionId, TraceIdentifier, MinRequestBodyDataRate.BytesPerSecond);
             SendTimeoutResponse();
         }
 

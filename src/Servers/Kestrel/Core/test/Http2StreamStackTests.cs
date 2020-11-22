@@ -102,13 +102,11 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
             (
                 connectionId: "TestConnectionId",
                 protocols: HttpProtocols.Http2,
-                connectionContext: null!,
                 serviceContext: TestContextFactory.CreateServiceContext(serverOptions: new KestrelServerOptions()),
                 connectionFeatures: new FeatureCollection(),
                 memoryPool: MemoryPool<byte>.Shared,
                 localEndPoint: null,
                 remoteEndPoint: null,
-                transport: null!,
                 streamId: streamId,
                 streamLifetimeHandler: null!,
                 clientPeerSettings: new Http2PeerSettings(),

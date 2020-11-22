@@ -454,7 +454,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http2
 
                     if (_minResponseDataRate != null)
                     {
-                        _timeoutControl!.BytesWrittenToBuffer(_minResponseDataRate, _unflushedBytes);
+                        _timeoutControl.BytesWrittenToBuffer(_minResponseDataRate, _unflushedBytes);
                     }
 
                     _unflushedBytes = 0;
@@ -468,7 +468,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http2
 
                 if (_minResponseDataRate != null)
                 {
-                    _timeoutControl!.StartTimingWrite();
+                    _timeoutControl.StartTimingWrite();
                 }
 
                 // This awaitable releases continuations in FIFO order when the window updates.
@@ -482,7 +482,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http2
 
                 if (_minResponseDataRate != null)
                 {
-                    _timeoutControl!.StopTimingWrite();
+                    _timeoutControl.StopTimingWrite();
                 }
             }
 

@@ -27,7 +27,6 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
         {
             var context = TestContextFactory.CreateHttp2StreamContext(
                 serviceContext: new TestServiceContext(),
-                transport: Mock.Of<IDuplexPipe>(),
                 timeoutControl: Mock.Of<ITimeoutControl>());
 
             _httpConnectionContext = context;

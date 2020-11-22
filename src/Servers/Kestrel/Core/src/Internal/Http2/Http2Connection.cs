@@ -650,13 +650,11 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http2
             var streamContext = new Http2StreamContext(
                 ConnectionId,
                 protocols: default,
-                connectionContext: null!, // TODO
                 _context.ServiceContext,
                 _context.ConnectionFeatures,
                 _context.MemoryPool,
                 _context.LocalEndPoint,
                 _context.RemoteEndPoint,
-                transport: null!, // TODO
                 _incomingFrame.StreamId,
                 streamLifetimeHandler: this,
                 _clientSettings,

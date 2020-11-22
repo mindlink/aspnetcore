@@ -15,20 +15,18 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http2
         public Http2StreamContext(
             string connectionId,
             HttpProtocols protocols,
-            ConnectionContext connectionContext,
             ServiceContext serviceContext,
             IFeatureCollection connectionFeatures,
             MemoryPool<byte> memoryPool,
             IPEndPoint? localEndPoint,
             IPEndPoint? remoteEndPoint,
-            IDuplexPipe transport,
             int streamId,
             IHttp2StreamLifetimeHandler streamLifetimeHandler,
             Http2PeerSettings clientPeerSettings,
             Http2PeerSettings serverPeerSettings,
             Http2FrameWriter frameWriter,
             InputFlowControl connectionInputFlowControl,
-            OutputFlowControl connectionOutputFlowControl) : base(connectionId, protocols, connectionContext, serviceContext, connectionFeatures, memoryPool, localEndPoint, remoteEndPoint, transport)
+            OutputFlowControl connectionOutputFlowControl) : base(connectionId, protocols, connectionContext: null!, serviceContext, connectionFeatures, memoryPool, localEndPoint, remoteEndPoint, transport: null!)
         {
             StreamId = streamId;
             StreamLifetimeHandler = streamLifetimeHandler;

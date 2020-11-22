@@ -104,12 +104,14 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
                 var endpoint = new EndpointConfig(
                     endpointConfig.Key,
                     url,
-                    ParseProtocols(endpointConfig[ProtocolsKey]),
-                    ParseSslProcotols(endpointConfig.GetSection(SslProtocolsKey)),
-                    new CertificateConfig(endpointConfig.GetSection(CertificateKey)),
-                    ParseClientCertificateMode(endpointConfig[ClientCertificateModeKey]),
                     ReadSni(endpointConfig.GetSection(SniKey), endpointConfig.Key),
-                    endpointConfig);
+                    endpointConfig)
+                {
+                    Protocols = ParseProtocols(endpointConfig[ProtocolsKey]),
+                    SslProtocols = ParseSslProcotols(endpointConfig.GetSection(SslProtocolsKey)),
+                    ClientCertificateMode = ParseClientCertificateMode(endpointConfig[ClientCertificateModeKey]),
+                    Certificate = new CertificateConfig(endpointConfig.GetSection(CertificateKey))
+                };
 
                 endpoints.Add(endpoint);
             }
@@ -262,19 +264,11 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
         public EndpointConfig(
             string name,
             string url,
-            HttpProtocols? protocols,
-            SslProtocols? sslProtocols,
-            CertificateConfig certificate,
-            ClientCertificateMode? clientCertificateMode,
             Dictionary<string, SniConfig> sni,
             IConfigurationSection configSection)
         {
             Name = name;
             Url = url;
-            Protocols = protocols;
-            SslProtocols = sslProtocols;
-            Certificate = certificate;
-            ClientCertificateMode = clientCertificateMode;
             Sni = sni;
 
             // Compare config sections because it's accessible to app developers via an Action<EndpointConfiguration> callback.
@@ -288,12 +282,13 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Internal
 
         public string Name { get; }
         public string Url { get; }
+        public Dictionary<string, SniConfig> Sni { get; }
+        public IConfigurationSection ConfigSection { get; }
+
         public HttpProtocols? Protocols { get; set; }
         public SslProtocols? SslProtocols { get; set; }
         public CertificateConfig? Certificate { get; set; }
         public ClientCertificateMode? ClientCertificateMode { get; set; }
-        public Dictionary<string, SniConfig> Sni { get; }
-        public IConfigurationSection ConfigSection { get; }
 
         public override bool Equals(object? obj) =>
             obj is EndpointConfig other &&

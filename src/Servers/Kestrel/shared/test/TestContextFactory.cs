@@ -87,13 +87,11 @@ namespace Microsoft.AspNetCore.Testing
 
         public static Http2StreamContext CreateHttp2StreamContext(
             string connectionId = null,
-            ConnectionContext connectionContext = null,
             ServiceContext serviceContext = null,
             IFeatureCollection connectionFeatures = null,
             MemoryPool<byte> memoryPool = null,
             IPEndPoint localEndPoint = null,
             IPEndPoint remoteEndPoint = null,
-            IDuplexPipe transport = null,
             int? streamId = null,
             IHttp2StreamLifetimeHandler streamLifetimeHandler = null,
             Http2PeerSettings clientPeerSettings = null,
@@ -107,13 +105,11 @@ namespace Microsoft.AspNetCore.Testing
             (
                 connectionId: connectionId ?? "TestConnectionId",
                 protocols: HttpProtocols.Http2,
-                connectionContext: connectionContext,
                 serviceContext: serviceContext ?? CreateServiceContext(new KestrelServerOptions()),
                 connectionFeatures: connectionFeatures ?? new FeatureCollection(),
                 memoryPool: memoryPool ?? MemoryPool<byte>.Shared,
                 localEndPoint: localEndPoint,
                 remoteEndPoint: remoteEndPoint,
-                transport: transport,
                 streamId: streamId ?? 0,
                 streamLifetimeHandler: streamLifetimeHandler,
                 clientPeerSettings: clientPeerSettings ?? new Http2PeerSettings(),

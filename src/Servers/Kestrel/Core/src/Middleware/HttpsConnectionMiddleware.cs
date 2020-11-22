@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Https.Internal
         private readonly Func<Stream, SslStream> _sslStreamFactory;
 
         // The following fields are only set by HttpsConnectionAdapterOptions ctor.
-        private readonly HttpsConnectionAdapterOptions _options;
+        private readonly HttpsConnectionAdapterOptions? _options;
         private readonly SslStreamCertificateContext? _serverCertificateContext;
         private readonly X509Certificate2? _serverCertificate;
         private readonly Func<ConnectionContext, string?, X509Certificate2?>? _serverCertificateSelector;
@@ -116,10 +116,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Https.Internal
             _sslStreamFactory = s => new SslStream(s, leaveInnerStreamOpen: false, userCertificateValidationCallback: remoteCertificateValidationCallback);
         }
 
-        // TODO: Options is null here
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         internal HttpsConnectionMiddleware(
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
             ConnectionDelegate next,
             HttpsOptionsCallback httpsOptionsCallback,
             object httpsOptionsCallbackState,
@@ -306,6 +303,8 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Https.Internal
 
         private Task DoOptionsBasedHandshakeAsync(ConnectionContext context, SslStream sslStream, Core.Internal.TlsConnectionFeature feature, CancellationToken cancellationToken)
         {
+            Debug.Assert(_options != null, "Middleware must be created with options.");
+
             // Adapt to the SslStream signature
             ServerCertificateSelectionCallback? selector = null;
             if (_serverCertificateSelector != null)
@@ -397,8 +396,12 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Https.Internal
             return true;
         }
 
-        private bool RemoteCertificateValidationCallback(object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors) =>
-            RemoteCertificateValidationCallback(_options.ClientCertificateMode, _options.ClientCertificateValidation, certificate, chain, sslPolicyErrors);
+        private bool RemoteCertificateValidationCallback(object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors)
+        {
+            Debug.Assert(_options != null, "Middleware must be created with options.");
+
+            return RemoteCertificateValidationCallback(_options.ClientCertificateMode, _options.ClientCertificateValidation, certificate, chain, sslPolicyErrors);
+        }
 
         private SslDuplexPipe CreateSslDuplexPipe(IDuplexPipe transport, MemoryPool<byte>? memoryPool)
         {
