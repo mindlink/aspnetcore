@@ -82,7 +82,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Https
                 hasEkuExtension = true;
                 foreach (var oid in extension.EnhancedKeyUsages)
                 {
-                    if (oid.Value?.Equals(ServerAuthenticationOid, StringComparison.Ordinal) ?? false)
+                    if (string.Equals(oid.Value, ServerAuthenticationOid, StringComparison.Ordinal))
                     {
                         return true;
                     }
